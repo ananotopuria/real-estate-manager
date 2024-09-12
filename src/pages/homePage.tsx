@@ -1,10 +1,17 @@
+import Filters from "../components/Filters";
+
 function HomePage() {
-    return (
-      <>
-        <p className="text-red-600">homepage</p>
-      </>
-    );
-  };
-  
-  export default HomePage;
-  
+  return (
+    <section className="mx-[16rem] my-[3rem] flex">
+      <div className="border border-[#DBDBDB]">
+        <Filters />
+      </div>
+      <div>
+        <button>ლისტის დამატება</button>
+        <button>აგენტის დამატება</button>
+      </div>
+    </section>
+  );
+}
+
+export default HomePage;
