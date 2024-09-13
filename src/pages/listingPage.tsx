@@ -1,10 +1,9 @@
 function ListingPage() {
-    return (
-      <>
-        <p>listing page</p>
-      </>
-    );
-  };
-  
-  export default ListingPage;
-  
+  return (
+    <>
+      <p>listing</p>
+    </>
+  );
+};
+
+export default ListingPage;
