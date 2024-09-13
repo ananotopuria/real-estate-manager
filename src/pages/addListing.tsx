@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Field, Formik, Form } from "formik";
 import * as Yup from "yup";
+import ImageUpload from "../components/AddListingComponents/ImageUpload";
 
 interface Region {
   id: number;
@@ -20,7 +21,7 @@ const AddListingForm = () => {
   useEffect(() => {
     const fetchRegions = async () => {
       try {
-        const response = await fetch("/api/regions"); 
+        const response = await fetch("/api/regions");
         const data = await response.json();
         setRegions(data);
       } catch (error) {
@@ -234,7 +235,7 @@ const AddListingForm = () => {
                 className="border border-custom-border rounded-lg p-2 text-custom-blue focus:outline-none focus:ring-1 focus:ring-custom-orange mt-2 h-[13rem]"
               />
             </div>
-
+            {/* 
             <div className="mt-[2rem] flex flex-col">
               <label htmlFor="image">ატვირთეთ ფოტო *</label>
               <input
@@ -248,7 +249,8 @@ const AddListingForm = () => {
                 }}
                 className="input"
               />
-            </div>
+            </div> */}
+            <ImageUpload setFieldValue={setFieldValue} />
 
             <div>
               <label htmlFor="agent">აგენტი</label>
