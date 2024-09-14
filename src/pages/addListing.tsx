@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Field, Formik, Form } from "formik";
+import { Field, Formik, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import ImageUpload from "../components/AddListingComponents/ImageUpload";
+import Button from "../components/CommonComponents/Button";
+import { FaCheck } from "react-icons/fa6";
 
 interface Region {
   id: number;
@@ -21,7 +23,15 @@ const AddListingForm = () => {
   useEffect(() => {
     const fetchRegions = async () => {
       try {
-        const response = await fetch("/api/regions");
+        const response = await fetch(
+          "https://api.real-estate-manager.redberryinternship.ge/api/regions",
+          {
+            headers: {
+              accept: "application/json",
+              Authorization: `Bearer 9d01f43f-5130-4ab4-9329-f6f43456d1ff`,
+            },
+          }
+        );
         const data = await response.json();
         setRegions(data);
       } catch (error) {
@@ -37,7 +47,13 @@ const AddListingForm = () => {
       const fetchCities = async () => {
         try {
           const response = await fetch(
-            `/api/cities?regionId=${selectedRegion}`
+            `https://api.real-estate-manager.redberryinternship.ge/api/cities?regionId=${selectedRegion}`,
+            {
+              headers: {
+                accept: "application/json",
+                Authorization: `Bearer 9d01f43f-5130-4ab4-9329-f6f43456d1ff`,
+              },
+            }
           );
           const data = await response.json();
           setCities(data);
@@ -52,11 +68,33 @@ const AddListingForm = () => {
     }
   }, [selectedRegion]);
 
+  useEffect(() => {
+    const fetchAgents = async () => {
+      try {
+        const response = await fetch(
+          "https://api.real-estate-manager.redberryinternship.ge/api/agents",
+          {
+            headers: {
+              accept: "application/json",
+              Authorization: `Bearer 9d01f43f-5130-4ab4-9329-f6f43456d1ff`,
+            },
+          }
+        );
+        const data = await response.json();
+        setAgents(data);
+      } catch (error) {
+        console.error("Error fetching agents:", error);
+      }
+    };
+
+    fetchAgents();
+  }, []);
+
   // Validation
   const validationSchema = Yup.object({
     address: Yup.string()
       .required("სავალდებულოა")
-      .min(2, "მისამართი ძალიან მოკლეა"),
+      .min(2, `ჩაწერეთ ვალიდური მონაცემები`),
     image: Yup.mixed()
       .required("სავალდებულოა")
       .test("fileType", "სურათის ტიპი არასწორია", (value) => {
@@ -69,17 +107,29 @@ const AddListingForm = () => {
       .test("fileSize", "ფაილი არ უნდა აღემატებოდეს 1MB-ს", (value) => {
         return value && value instanceof File && value.size <= 1024 * 1024;
       }),
-    region: Yup.string().required("სავალდებულოა"),
-    city: Yup.string().required("სავალდებულოა"),
-    zipCode: Yup.number().required("სავალდებულოა"),
-    price: Yup.number().required("სავალდებულოა"),
+    // region: Yup.string().required("სავალდებულოა"),
+    // city: Yup.string().required("სავალდებულოა"),
+    zipCode: Yup.number()
+      .required("მხოლოდ რიცხვები")
+      .integer("მთელი რიცხვი უნდა იყოს"),
+    price: Yup.number()
+      .required("სავალდებულოა")
+      .integer("მთელი რიცხვი უნდა იყოს"),
     area: Yup.number().required("სავალდებულოა"),
+    // .integer("მთელი რიცხვი უნდა იყოს"),
     bedrooms: Yup.number()
       .required("სავალდებულოა")
       .integer("მთელი რიცხვი უნდა იყოს"),
+    // description: Yup.string()
+    //   .required("სავალდებულოა")
+    //   .min(5, "მინიმუმ 5 სიტყვა"),
     description: Yup.string()
       .required("სავალდებულოა")
-      .min(5, "მინიმუმ 5 სიტყვა"),
+      .test("minWords", "მინიმუმ 5 სიტყვა", (value) => {
+        if (!value) return false;
+        const wordCount = value.trim().split(/\s+/).length;
+        return wordCount >= 5;
+      }),
     saleRentTag: Yup.string().required("სავალდებულოა"),
     agent: Yup.string().required("სავალდებულოა"),
   });
@@ -108,7 +158,7 @@ const AddListingForm = () => {
           console.log("Form submitted:", values);
         }}
       >
-        {({ setFieldValue }) => (
+        {({ setFieldValue, errors, touched, values }) => (
           <Form>
             <div>
               <label className="text-[1.6rem]">გარიგების ტიპი</label>
@@ -127,14 +177,49 @@ const AddListingForm = () => {
                   type="text"
                   className="border border-custom-border rounded-lg p-2 text-custom-blue focus:outline-none focus:ring-1 focus:ring-custom-orange mt-2"
                 />
+                <div className="text-sm mt-1 flex items-center">
+                  {errors.address && touched.address ? (
+                    <div className="text-[#F93B1D] flex items-center">
+                      <FaCheck className="text-[#F93B1D] mr-1" />{" "}
+                      {errors.address}
+                    </div>
+                  ) : values.address && !errors.address ? (
+                    <div className="text-[#45A849] flex items-center">
+                      <FaCheck className="text-[#45A849] mr-1" /> მინიმუმ ორი
+                      სიმბოლო
+                    </div>
+                  ) : (
+                    <div className="text-black flex items-center">
+                      <FaCheck className="text-black mr-1" /> მინიმუმ ორი
+                      სიმბოლო
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="text-[1.2rem] flex flex-col w-full">
                 <label htmlFor="zipCode">საფოსტო ინდექსი *</label>
                 <Field
                   name="zipCode"
-                  type="text"
+                  type="number"
                   className="border border-custom-border rounded-lg p-2 text-custom-blue focus:outline-none focus:ring-1 focus:ring-custom-orange mt-2"
                 />
+                <div className="text-sm mt-1 flex items-center">
+                  {errors.zipCode && touched.zipCode ? (
+                    <div className="text-[#F93B1D] flex items-center">
+                      <FaCheck className="text-[#F93B1D] mr-1" />{" "}
+                      {errors.zipCode}
+                    </div>
+                  ) : values.zipCode && !errors.zipCode ? (
+                    <div className="text-[#45A849] flex items-center">
+                      <FaCheck className="text-[#45A849] mr-1" /> მხოლოდ
+                      რიცხვები
+                    </div>
+                  ) : (
+                    <div className="text-black flex items-center">
+                      <FaCheck className="text-black mr-1" /> მხოლოდ რიცხვები
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             <div className="flex mt-2 justify-between gap-[2rem]">
@@ -182,21 +267,6 @@ const AddListingForm = () => {
               </div>
             </div>
 
-            {selectedRegion && (
-              <div>
-                <label htmlFor="city">ქალაქი</label>
-                <Field as="select" name="city" className="input">
-                  <option value="">აირჩიეთ ქალაქი</option>
-                  {Array.isArray(cities) &&
-                    cities.map((city) => (
-                      <option key={city.id} value={city.id}>
-                        {city.name}
-                      </option>
-                    ))}
-                </Field>
-              </div>
-            )}
-
             <h3 className="mt-[4rem] text-[1.6rem]">ბინის დეტალები</h3>
             <div className="flex mt-2 justify-between gap-[2rem]">
               <div className="text-[1.2rem] flex flex-col w-full">
@@ -206,6 +276,22 @@ const AddListingForm = () => {
                   type="number"
                   className="border border-custom-border rounded-lg p-2 text-custom-blue focus:outline-none focus:ring-1 focus:ring-custom-orange mt-2"
                 />
+                <div className="text-sm mt-1 flex items-center">
+                  {errors.price && touched.price ? (
+                    <div className="text-[#F93B1D] flex items-center">
+                      <FaCheck className="text-[#F93B1D] mr-1" /> {errors.price}
+                    </div>
+                  ) : values.price && !errors.price ? (
+                    <div className="text-[#45A849] flex items-center">
+                      <FaCheck className="text-[#45A849] mr-1" /> მხოლოდ
+                      რიცხვები
+                    </div>
+                  ) : (
+                    <div className="text-black flex items-center">
+                      <FaCheck className="text-black mr-1" /> მხოლოდ რიცხვები
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="text-[1.2rem] flex flex-col w-full">
@@ -215,6 +301,22 @@ const AddListingForm = () => {
                   type="number"
                   className="border border-custom-border rounded-lg p-2 text-custom-blue focus:outline-none focus:ring-1 focus:ring-custom-orange mt-2"
                 />
+                <div className="text-sm mt-1 flex items-center">
+                  {errors.area && touched.area ? (
+                    <div className="text-[#F93B1D] flex items-center">
+                      <FaCheck className="text-[#F93B1D] mr-1" /> {errors.area}
+                    </div>
+                  ) : values.area && !errors.area ? (
+                    <div className="text-[#45A849] flex items-center">
+                      <FaCheck className="text-[#45A849] mr-1" /> მხოლოდ
+                      რიცხვები
+                    </div>
+                  ) : (
+                    <div className="text-black flex items-center">
+                      <FaCheck className="text-black mr-1" /> მხოლოდ რიცხვები
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -225,6 +327,22 @@ const AddListingForm = () => {
                 type="number"
                 className="border border-custom-border rounded-lg p-2 text-custom-blue focus:outline-none focus:ring-1 focus:ring-custom-orange mt-2"
               />
+              <div className="text-sm mt-1 flex items-center">
+                {errors.bedrooms && touched.bedrooms ? (
+                  <div className="text-[#F93B1D] flex items-center">
+                    <FaCheck className="text-[#F93B1D] mr-1" />{" "}
+                    {errors.bedrooms}
+                  </div>
+                ) : values.bedrooms && !errors.bedrooms ? (
+                  <div className="text-[#45A849] flex items-center">
+                    <FaCheck className="text-[#45A849] mr-1" /> მხოლოდ რიცხვები
+                  </div>
+                ) : (
+                  <div className="text-black flex items-center">
+                    <FaCheck className="text-black mr-1" /> მხოლოდ რიცხვები
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="mt-[2rem] flex flex-col text-[1.2rem]">
@@ -234,32 +352,51 @@ const AddListingForm = () => {
                 as="textarea"
                 className="border border-custom-border rounded-lg p-2 text-custom-blue focus:outline-none focus:ring-1 focus:ring-custom-orange mt-2 h-[13rem]"
               />
+              <div className="text-sm mt-1 flex items-center">
+                {errors.description && touched.description ? (
+                  <div className="text-[#F93B1D] flex items-center">
+                    <FaCheck className="text-[#F93B1D] mr-1" />{" "}
+                    {errors.description}
+                  </div>
+                ) : values.description && !errors.description ? (
+                  <div className="text-[#45A849] flex items-center">
+                    <FaCheck className="text-[#45A849] mr-1" /> მინიმუმ ხუთი
+                    სიტყვა
+                  </div>
+                ) : (
+                  <div className="text-black flex items-center">
+                    <FaCheck className="text-black mr-1" /> მინიმუმ ხუთი სიტყვა
+                  </div>
+                )}
+              </div>
             </div>
-            {/* 
-            <div className="mt-[2rem] flex flex-col">
-              <label htmlFor="image">ატვირთეთ ფოტო *</label>
-              <input
-                id="image"
-                name="image"
-                type="file"
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  if (e.currentTarget.files) {
-                    setFieldValue("image", e.currentTarget.files[0]);
-                  }
-                }}
-                className="input"
-              />
-            </div> */}
             <ImageUpload setFieldValue={setFieldValue} />
-
-            <div>
-              <label htmlFor="agent">აგენტი</label>
-              <Field as="select" name="agent" className="input">
+            <h3 className="mt-[4rem] text-[1.6rem]">აგენტი</h3>
+            <div className="mt-[1rem] flex flex-col">
+              <label htmlFor="agent" className="mt-[1rem] text-[1.2rem]">
+                აირჩიე
+              </label>
+              <Field
+                as="select"
+                name="agent"
+                className="border border-custom-border rounded-lg p-2 text-custom-blue focus:outline-none focus:ring-1 focus:ring-custom-orange mt-2 w-[48.5%]"
+              >
                 <option value="">აირჩიეთ აგენტი</option>
               </Field>
+              <ErrorMessage name="agent">
+                {(msg) => (
+                  <div className="text-red-600 text-sm mt-1">{msg}</div>
+                )}
+              </ErrorMessage>
             </div>
-
-            <button type="submit">Submit</button>
+            <div className="mt-[4rem] mb-[4rem] flex gap-6 justify-end">
+              <Button
+                title="გაუქმება"
+                backgroundColor="#fff"
+                textColor="#f93b1d"
+              />
+              <Button title="დაამატე ლისტინგი" />
+            </div>
           </Form>
         )}
       </Formik>
@@ -268,3 +405,4 @@ const AddListingForm = () => {
 };
 
 export default AddListingForm;
+

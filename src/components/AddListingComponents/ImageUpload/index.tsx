@@ -38,7 +38,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ setFieldValue }) => {
   });
 
   return (
-    <div className="mt-[2rem] flex flex-col">
+    <div className="mt-[2rem] flex flex-col text-[1.2rem]">
       <label htmlFor="image">ატვირთეთ ფოტო *</label>
       <div
         {...getRootProps()}
