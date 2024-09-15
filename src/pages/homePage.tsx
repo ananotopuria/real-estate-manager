@@ -1,9 +1,43 @@
 import { useState } from "react";
-import { FaPlus } from "react-icons/fa6";
+import { FaCheck, FaPlus } from "react-icons/fa";
 import Button from "../components/CommonComponents/Button";
 import Filters from "../components/HomeComponents/Filters";
 import Modal from "../components/HomeComponents/Modal";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
+import {
+  Formik,
+  Form,
+  Field,
+  FormikHelpers,
+  FormikProps,
+} from "formik";
+import * as Yup from "yup";
+import ImageUpload from "../components/AddListingComponents/ImageUpload";
+
+interface AgentFormValues {
+  name: string;
+  surname: string;
+  email: string;
+  avatar: File | null;
+  phone: string;
+}
+
+const validationSchema = Yup.object({
+  name: Yup.string()
+    .min(2, "სახელი უნდა შეიცავდეს მინიმუმ 2 სიმბოლოს")
+    .required("სახელი სავალდებულოა"),
+  surname: Yup.string()
+    .min(2, "გვარი უნდა შეიცავდეს მინიმუმ 2 სიმბოლოს")
+    .required("გვარი სავალდებულოა"),
+  email: Yup.string()
+    .email("ელ-ფოსტა უნდა იყოს ვალიდური")
+    .matches(/@redberry\.ge$/, "ელ-ფოსტა უნდა მთავრდებოდეს @redberry.ge-თ")
+    .required("ელ-ფოსტა სავალდებულოა"),
+  avatar: Yup.mixed().required("ავატარის ატვირთვა სავალდებულოა"),
+  phone: Yup.string()
+    .matches(/^5\d{8}$/, "ტელეფონი უნდა იყოს ფორმატის 5XXXXXXXX")
+    .required("ტელ-ნომერი სავალდებულოა"),
+});
 
 function HomePage() {
   const navigate = useNavigate();
@@ -15,6 +49,16 @@ function HomePage() {
 
   const handleCloseModal = () => {
     setAgentModalOpen(false);
+  };
+
+  const handleSubmit = (
+    values: AgentFormValues,
+    { setSubmitting }: FormikHelpers<AgentFormValues>
+  ) => {
+    console.log("Form Submitted with values:", values);
+
+    setSubmitting(false);
+    handleCloseModal();
   };
 
   return (
@@ -37,17 +81,167 @@ function HomePage() {
           onClick={handleAgentAddClick}
         />
       </div>
-    {/* modal */}
+
       {isAgentModalOpen && (
         <Modal open={isAgentModalOpen}>
-          <div className="p-6 bg-white rounded-lg shadow-lg">
-            <h2 className="text-xl font-bold mb-4">აგენტის დამატება</h2>
-            <button
-              className="mt-4 p-2 bg-red-500 text-white rounded"
-              onClick={handleCloseModal}
+          <div className="p-6 bg-white rounded-lg shadow-lg w-[100rem] h-[65rem]">
+            <h2 className="text-[3.2rem] font-bold text-custom-blue mb-6 text-center mt-[8rem]">
+              აგენტის დამატება
+            </h2>
+            <Formik<AgentFormValues>
+              initialValues={{
+                name: "",
+                surname: "",
+                email: "",
+                avatar: null,
+                phone: "",
+              }}
+              validationSchema={validationSchema}
+              onSubmit={handleSubmit}
             >
-              Close
-            </button>
+              {({
+                errors,
+                touched,
+                setFieldValue,
+                values,
+              }: FormikProps<AgentFormValues>) => (
+                <Form className="mx-[10rem] mt-[6rem]">
+                  {/* name */}
+                  <div className="flex mt-2 justify-between gap-[2rem]">
+                    <div className="text-[1.2rem] flex flex-col w-full">
+                      <label htmlFor="name">სახელი *</label>
+                      <Field
+                        type="text"
+                        name="name"
+                        className="border border-custom-border rounded-lg p-2 text-custom-blue focus:outline-none focus:ring-1 focus:ring-custom-orange mt-2"
+                      />
+                      <div className="text-sm mt-1 flex items-center">
+                        {errors.name && touched.name ? (
+                          <div className="text-[#F93B1D] flex items-center">
+                            <FaCheck className="text-[#F93B1D] mr-1" />{" "}
+                            {errors.name}
+                          </div>
+                        ) : !errors.name &&
+                          touched.name &&
+                          values.name.length >= 2 ? (
+                          <div className="text-[#45A849] flex items-center">
+                            <FaCheck className="text-[#45A849] mr-1" /> მინიმუმ
+                            ორი სიმბოლო
+                          </div>
+                        ) : (
+                          <div className="text-black flex items-center">
+                            <FaCheck className="text-black mr-1" /> მინიმუმ ორი
+                            სიმბოლო
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* surname  */}
+                    <div className="text-[1.2rem] flex flex-col w-full">
+                      <label htmlFor="surname">გვარი *</label>
+                      <Field
+                        type="text"
+                        name="surname"
+                        className="border border-custom-border rounded-lg p-2 text-custom-blue focus:outline-none focus:ring-1 focus:ring-custom-orange mt-2"
+                      />
+                      <div className="text-sm mt-1 flex items-center">
+                        {errors.surname && touched.surname ? (
+                          <div className="text-[#F93B1D] flex items-center">
+                            <FaCheck className="text-[#F93B1D] mr-1" />{" "}
+                            {errors.surname}
+                          </div>
+                        ) : !errors.surname &&
+                          touched.surname &&
+                          values.surname.length >= 2 ? (
+                          <div className="text-[#45A849] flex items-center">
+                            <FaCheck className="text-[#45A849] mr-1" /> მინიმუმ
+                            ორი სიმბოლო
+                          </div>
+                        ) : (
+                          <div className="text-black flex items-center">
+                            <FaCheck className="text-black mr-1" /> მინიმუმ ორი
+                            სიმბოლო
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* email */}
+                  <div className="flex mt-2 justify-between gap-[2rem]">
+                    <div className="text-[1.2rem] flex flex-col w-full">
+                      <label htmlFor="email">ელ-ფოსტა *</label>
+                      <Field
+                        type="email"
+                        name="email"
+                        className="border border-custom-border rounded-lg p-2 text-custom-blue focus:outline-none focus:ring-1 focus:ring-custom-orange mt-2"
+                      />
+                      <div className="text-sm mt-1 flex items-center">
+                        {errors.email && touched.email ? (
+                          <div className="text-[#F93B1D] flex items-center">
+                            <FaCheck className="text-[#F93B1D] mr-1" />
+                            {errors.email}
+                          </div>
+                        ) : !errors.email && touched.email ? (
+                          <div className="text-[#45A849] flex items-center">
+                            <FaCheck className="text-[#45A849] mr-1" />
+                            ვალიდური ელ-ფოსტა (@redberry.ge)
+                          </div>
+                        ) : (
+                          <div className="text-black flex items-center">
+                            <FaCheck className="text-black mr-1" />
+                            ელ-ფოსტა უნდა მთავრდებოდეს @redberry.ge-თ
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* ph number */}
+                    <div className="text-[1.2rem] flex flex-col w-full">
+                      <label htmlFor="phone">ტელეფონის ნომერი</label>
+                      <Field
+                        type="tel"
+                        name="phone"
+                        className="border border-custom-border rounded-lg p-2 text-custom-blue focus:outline-none focus:ring-1 focus:ring-custom-orange mt-2"
+                        placeholder="5XXXXXXXX"
+                      />
+                      <div className="text-sm mt-1 flex items-center">
+                        {errors.phone && touched.phone ? (
+                          <div className="text-[#F93B1D] flex items-center">
+                            <FaCheck className="text-[#F93B1D] mr-1" />
+                            {errors.phone}
+                          </div>
+                        ) : !errors.phone && touched.phone ? (
+                          <div className="text-[#45A849] flex items-center">
+                            <FaCheck className="text-[#45A849] mr-1" />
+                            ტელეფონი სწორია (5XXXXXXXX)
+                          </div>
+                        ) : (
+                          <div className="text-black flex items-center">
+                            <FaCheck className="text-black mr-1" />
+                            მხოლოდ რიცხვები
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  {/* photo */}
+                  <ImageUpload setFieldValue={setFieldValue} />
+
+                  {/* buttons */}
+
+                  <div className="mt-[4rem] mb-[4rem] flex gap-6 justify-end">
+                    <Button
+                      title="გაუქმება"
+                      backgroundColor="#fff"
+                      textColor="#f93b1d"
+                    />
+                    <Button title="დაამატე აგენტი" />
+                  </div>
+                </Form>
+              )}
+            </Formik>
           </div>
         </Modal>
       )}
