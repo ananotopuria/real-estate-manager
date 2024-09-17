@@ -40,7 +40,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           <TiLocation />
           <span>{address}</span>
         </p>
-        <div className="flex justify-between mt-4 ">
+        <div className="flex justify-between mt-4">
           <p className="text-gray-600 flex items-center gap-2">
             <IoIosBed />
             <span>{bedrooms}</span>

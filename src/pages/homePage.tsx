@@ -8,6 +8,7 @@ import { Formik, Form, Field, FormikHelpers, FormikProps } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import ImageUpload from "../components/AddListingComponents/ImageUpload";
+import RealEstateListing from "../components/CommonComponents/PropertyCard";
 
 interface AgentFormValues {
   name: string;
@@ -88,199 +89,205 @@ function HomePage() {
   };
 
   return (
-    <section className="mx-[16rem] my-[3rem] flex justify-between">
-      <div className="border border-[#DBDBDB]">
-        <Filters />
-      </div>
-      <div className="flex gap-10">
-        <Button
-          title="ლისტინგის დამატება"
-          icon={<FaPlus />}
-          textColor="#ffffff"
-          onClick={() => navigate("/add")}
-        />
-        <Button
-          title="აგენტის დამატება"
-          icon={<FaPlus />}
-          backgroundColor="#fff"
-          textColor="#f93b1d"
-          onClick={handleAgentAddClick}
-        />
-      </div>
+    <>
+      <section className="mx-[16rem] my-[3rem] flex justify-between">
+        <div className="border border-[#DBDBDB]">
+          <Filters />
+        </div>
+        <div className="flex gap-10">
+          <Button
+            title="ლისტინგის დამატება"
+            icon={<FaPlus />}
+            textColor="#ffffff"
+            onClick={() => navigate("/add")}
+          />
+          <Button
+            title="აგენტის დამატება"
+            icon={<FaPlus />}
+            backgroundColor="#fff"
+            textColor="#f93b1d"
+            onClick={handleAgentAddClick}
+          />
+        </div>
 
-      {isAgentModalOpen && (
-        <Modal open={isAgentModalOpen}>
-          <div className="p-6 bg-white rounded-lg shadow-lg w-[100rem] h-[65rem]">
-            <h2 className="text-[3.2rem] font-bold text-custom-blue mb-6 text-center mt-[8rem]">
-              აგენტის დამატება
-            </h2>
-            <Formik<AgentFormValues>
-              initialValues={{
-                name: "",
-                surname: "",
-                email: "",
-                avatar: null,
-                phone: "",
-              }}
-              validationSchema={validationSchema}
-              onSubmit={handleSubmit}
-            >
-              {({
-                errors,
-                touched,
-                setFieldValue,
-                values,
-              }: FormikProps<AgentFormValues>) => (
-                <Form className="mx-[10rem] mt-[6rem]">
-                  {/* name */}
-                  <div className="flex mt-2 justify-between gap-[2rem]">
-                    <div className="text-[1.2rem] flex flex-col w-full">
-                      <label htmlFor="name">სახელი *</label>
-                      <Field
-                        type="text"
-                        name="name"
-                        className="border border-custom-border rounded-lg p-2 text-custom-blue focus:outline-none focus:ring-1 focus:ring-custom-orange mt-2"
-                      />
-                      <div className="text-sm mt-1 flex items-center">
-                        {errors.name && touched.name ? (
-                          <div className="text-[#F93B1D] flex items-center">
-                            <FaCheck className="text-[#F93B1D] mr-1" />{" "}
-                            {errors.name}
-                          </div>
-                        ) : !errors.name &&
-                          touched.name &&
-                          values.name.length >= 2 ? (
-                          <div className="text-[#45A849] flex items-center">
-                            <FaCheck className="text-[#45A849] mr-1" /> მინიმუმ
-                            ორი სიმბოლო
-                          </div>
-                        ) : (
-                          <div className="text-black flex items-center">
-                            <FaCheck className="text-black mr-1" /> მინიმუმ ორი
-                            სიმბოლო
-                          </div>
-                        )}
+        {isAgentModalOpen && (
+          <Modal open={isAgentModalOpen}>
+            <div className="p-6 bg-white rounded-lg shadow-lg w-[100rem] h-[65rem]">
+              <h2 className="text-[3.2rem] font-bold text-custom-blue mb-6 text-center mt-[8rem]">
+                აგენტის დამატება
+              </h2>
+              <Formik<AgentFormValues>
+                initialValues={{
+                  name: "",
+                  surname: "",
+                  email: "",
+                  avatar: null,
+                  phone: "",
+                }}
+                validationSchema={validationSchema}
+                onSubmit={handleSubmit}
+              >
+                {({
+                  errors,
+                  touched,
+                  setFieldValue,
+                  values,
+                }: FormikProps<AgentFormValues>) => (
+                  <Form className="mx-[10rem] mt-[6rem]">
+                    {/* name */}
+                    <div className="flex mt-2 justify-between gap-[2rem]">
+                      <div className="text-[1.2rem] flex flex-col w-full">
+                        <label htmlFor="name">სახელი *</label>
+                        <Field
+                          type="text"
+                          name="name"
+                          className="border border-custom-border rounded-lg p-2 text-custom-blue focus:outline-none focus:ring-1 focus:ring-custom-orange mt-2"
+                        />
+                        <div className="text-sm mt-1 flex items-center">
+                          {errors.name && touched.name ? (
+                            <div className="text-[#F93B1D] flex items-center">
+                              <FaCheck className="text-[#F93B1D] mr-1" />{" "}
+                              {errors.name}
+                            </div>
+                          ) : !errors.name &&
+                            touched.name &&
+                            values.name.length >= 2 ? (
+                            <div className="text-[#45A849] flex items-center">
+                              <FaCheck className="text-[#45A849] mr-1" />{" "}
+                              მინიმუმ ორი სიმბოლო
+                            </div>
+                          ) : (
+                            <div className="text-black flex items-center">
+                              <FaCheck className="text-black mr-1" /> მინიმუმ
+                              ორი სიმბოლო
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* surname  */}
+                      <div className="text-[1.2rem] flex flex-col w-full">
+                        <label htmlFor="surname">გვარი *</label>
+                        <Field
+                          type="text"
+                          name="surname"
+                          className="border border-custom-border rounded-lg p-2 text-custom-blue focus:outline-none focus:ring-1 focus:ring-custom-orange mt-2"
+                        />
+                        <div className="text-sm mt-1 flex items-center">
+                          {errors.surname && touched.surname ? (
+                            <div className="text-[#F93B1D] flex items-center">
+                              <FaCheck className="text-[#F93B1D] mr-1" />{" "}
+                              {errors.surname}
+                            </div>
+                          ) : !errors.surname &&
+                            touched.surname &&
+                            values.surname.length >= 2 ? (
+                            <div className="text-[#45A849] flex items-center">
+                              <FaCheck className="text-[#45A849] mr-1" />{" "}
+                              მინიმუმ ორი სიმბოლო
+                            </div>
+                          ) : (
+                            <div className="text-black flex items-center">
+                              <FaCheck className="text-black mr-1" /> მინიმუმ
+                              ორი სიმბოლო
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                    {/* surname  */}
-                    <div className="text-[1.2rem] flex flex-col w-full">
-                      <label htmlFor="surname">გვარი *</label>
-                      <Field
-                        type="text"
-                        name="surname"
-                        className="border border-custom-border rounded-lg p-2 text-custom-blue focus:outline-none focus:ring-1 focus:ring-custom-orange mt-2"
-                      />
-                      <div className="text-sm mt-1 flex items-center">
-                        {errors.surname && touched.surname ? (
-                          <div className="text-[#F93B1D] flex items-center">
-                            <FaCheck className="text-[#F93B1D] mr-1" />{" "}
-                            {errors.surname}
-                          </div>
-                        ) : !errors.surname &&
-                          touched.surname &&
-                          values.surname.length >= 2 ? (
-                          <div className="text-[#45A849] flex items-center">
-                            <FaCheck className="text-[#45A849] mr-1" /> მინიმუმ
-                            ორი სიმბოლო
-                          </div>
-                        ) : (
-                          <div className="text-black flex items-center">
-                            <FaCheck className="text-black mr-1" /> მინიმუმ ორი
-                            სიმბოლო
-                          </div>
-                        )}
+                    {/* email */}
+                    <div className="flex mt-2 justify-between gap-[2rem]">
+                      <div className="text-[1.2rem] flex flex-col w-full">
+                        <label htmlFor="email">ელ-ფოსტა *</label>
+                        <Field
+                          type="email"
+                          name="email"
+                          className="border border-custom-border rounded-lg p-2 text-custom-blue focus:outline-none focus:ring-1 focus:ring-custom-orange mt-2"
+                        />
+                        <div className="text-sm mt-1 flex items-center">
+                          {errors.email && touched.email ? (
+                            <div className="text-[#F93B1D] flex items-center">
+                              <FaCheck className="text-[#F93B1D] mr-1" />
+                              {errors.email}
+                            </div>
+                          ) : !errors.email && touched.email ? (
+                            <div className="text-[#45A849] flex items-center">
+                              <FaCheck className="text-[#45A849] mr-1" />
+                              ვალიდური ელ-ფოსტა (@redberry.ge)
+                            </div>
+                          ) : (
+                            <div className="text-black flex items-center">
+                              <FaCheck className="text-black mr-1" />
+                              ელ-ფოსტა უნდა მთავრდებოდეს @redberry.ge-თ
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* ph number */}
+                      <div className="text-[1.2rem] flex flex-col w-full">
+                        <label htmlFor="phone">ტელეფონის ნომერი</label>
+                        <Field
+                          type="tel"
+                          name="phone"
+                          className="border border-custom-border rounded-lg p-2 text-custom-blue focus:outline-none focus:ring-1 focus:ring-custom-orange mt-2"
+                          placeholder="5XXXXXXXX"
+                        />
+                        <div className="text-sm mt-1 flex items-center">
+                          {errors.phone && touched.phone ? (
+                            <div className="text-[#F93B1D] flex items-center">
+                              <FaCheck className="text-[#F93B1D] mr-1" />
+                              {errors.phone}
+                            </div>
+                          ) : !errors.phone && touched.phone ? (
+                            <div className="text-[#45A849] flex items-center">
+                              <FaCheck className="text-[#45A849] mr-1" />
+                              ვალიდური ტელეფონის ნომერი
+                            </div>
+                          ) : (
+                            <div className="text-black flex items-center">
+                              <FaCheck className="text-black mr-1" />
+                              ტელეფონის ნომერი უნდა იყოს ფორმატში 5XXXXXXXX
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* email */}
-                  <div className="flex mt-2 justify-between gap-[2rem]">
-                    <div className="text-[1.2rem] flex flex-col w-full">
-                      <label htmlFor="email">ელ-ფოსტა *</label>
-                      <Field
-                        type="email"
-                        name="email"
-                        className="border border-custom-border rounded-lg p-2 text-custom-blue focus:outline-none focus:ring-1 focus:ring-custom-orange mt-2"
+                    {/* avatar */}
+                    <div className="flex flex-col mt-4">
+                      <label htmlFor="avatar" className="text-[1.2rem]">
+                        ავატარი *
+                      </label>
+                      <ImageUpload
+                        setFieldValue={(field, value) =>
+                          setFieldValue(field, value)
+                        }
                       />
-                      <div className="text-sm mt-1 flex items-center">
-                        {errors.email && touched.email ? (
-                          <div className="text-[#F93B1D] flex items-center">
-                            <FaCheck className="text-[#F93B1D] mr-1" />
-                            {errors.email}
-                          </div>
-                        ) : !errors.email && touched.email ? (
-                          <div className="text-[#45A849] flex items-center">
-                            <FaCheck className="text-[#45A849] mr-1" />
-                            ვალიდური ელ-ფოსტა (@redberry.ge)
-                          </div>
-                        ) : (
-                          <div className="text-black flex items-center">
-                            <FaCheck className="text-black mr-1" />
-                            ელ-ფოსტა უნდა მთავრდებოდეს @redberry.ge-თ
-                          </div>
-                        )}
-                      </div>
                     </div>
 
-                    {/* ph number */}
-                    <div className="text-[1.2rem] flex flex-col w-full">
-                      <label htmlFor="phone">ტელეფონის ნომერი</label>
-                      <Field
-                        type="tel"
-                        name="phone"
-                        className="border border-custom-border rounded-lg p-2 text-custom-blue focus:outline-none focus:ring-1 focus:ring-custom-orange mt-2"
-                        placeholder="5XXXXXXXX"
+                    <div className="mt-[4rem] mb-[4rem] flex gap-6 justify-end">
+                      <Button
+                        title="გაუქმება"
+                        backgroundColor="#fff"
+                        textColor="#f93b1d"
+                        onClick={handleCloseModal}
                       />
-                      <div className="text-sm mt-1 flex items-center">
-                        {errors.phone && touched.phone ? (
-                          <div className="text-[#F93B1D] flex items-center">
-                            <FaCheck className="text-[#F93B1D] mr-1" />
-                            {errors.phone}
-                          </div>
-                        ) : !errors.phone && touched.phone ? (
-                          <div className="text-[#45A849] flex items-center">
-                            <FaCheck className="text-[#45A849] mr-1" />
-                            ვალიდური ტელეფონის ნომერი
-                          </div>
-                        ) : (
-                          <div className="text-black flex items-center">
-                            <FaCheck className="text-black mr-1" />
-                            ტელეფონის ნომერი უნდა იყოს ფორმატში 5XXXXXXXX
-                          </div>
-                        )}
-                      </div>
+                      <Button title="დაამატე აგენტი" type="submit" />
                     </div>
-                  </div>
+                  </Form>
+                )}
+              </Formik>
+            </div>
+          </Modal>
+        )}
+      </section>
+      <section>
 
-                  {/* avatar */}
-                  <div className="flex flex-col mt-4">
-                    <label htmlFor="avatar" className="text-[1.2rem]">
-                      ავატარი *
-                    </label>
-                    <ImageUpload
-                      setFieldValue={(field, value) =>
-                        setFieldValue(field, value)
-                      }
-                    />
-                  </div>
-
-                  <div className="mt-[4rem] mb-[4rem] flex gap-6 justify-end">
-                    <Button
-                      title="გაუქმება"
-                      backgroundColor="#fff"
-                      textColor="#f93b1d"
-                      onClick={handleCloseModal}
-                    />
-                    <Button title="დაამატე აგენტი" type="submit" />
-                  </div>
-                </Form>
-              )}
-            </Formik>
-          </div>
-        </Modal>
-      )}
-    </section>
+        <RealEstateListing/>
+      </section>
+    </>
   );
 }
 
