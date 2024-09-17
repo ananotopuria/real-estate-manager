@@ -4,14 +4,9 @@ import Button from "../components/CommonComponents/Button";
 import Filters from "../components/HomeComponents/Filters";
 import Modal from "../components/HomeComponents/Modal";
 import { useNavigate } from "react-router-dom";
-import {
-  Formik,
-  Form,
-  Field,
-  FormikHelpers,
-  FormikProps,
-} from "formik";
+import { Formik, Form, Field, FormikHelpers, FormikProps } from "formik";
 import * as Yup from "yup";
+import axios from "axios";
 import ImageUpload from "../components/AddListingComponents/ImageUpload";
 
 interface AgentFormValues {
@@ -51,14 +46,45 @@ function HomePage() {
     setAgentModalOpen(false);
   };
 
-  const handleSubmit = (
+  const handleSubmit = async (
     values: AgentFormValues,
     { setSubmitting }: FormikHelpers<AgentFormValues>
   ) => {
-    console.log("Form Submitted with values:", values);
+    try {
+      const formData = new FormData();
+      formData.append("name", values.name);
+      formData.append("surname", values.surname);
+      formData.append("email", values.email);
+      formData.append("phone", values.phone);
+      if (values.avatar) {
+        formData.append("avatar", values.avatar);
+      }
 
-    setSubmitting(false);
-    handleCloseModal();
+      const response = await axios.post(
+        "https://api.real-estate-manager.redberryinternship.ge/api/agents",
+        formData,
+        {
+          headers: {
+            accept: "application/json",
+            "Content-Type": "multipart/form-data",
+            Authorization: "Bearer 9d07d43c-d2e5-4af1-94f9-5d83672dee15",
+          },
+        }
+      );
+
+      console.log("Response:", response.data);
+      handleCloseModal();
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error:", error.response?.data || error.message);
+      } else if (error instanceof Error) {
+        console.error("General error:", error.message);
+      } else {
+        console.error("Unknown error:", error);
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -215,29 +241,38 @@ function HomePage() {
                         ) : !errors.phone && touched.phone ? (
                           <div className="text-[#45A849] flex items-center">
                             <FaCheck className="text-[#45A849] mr-1" />
-                            ტელეფონი სწორია (5XXXXXXXX)
+                            ვალიდური ტელეფონის ნომერი
                           </div>
                         ) : (
                           <div className="text-black flex items-center">
                             <FaCheck className="text-black mr-1" />
-                            მხოლოდ რიცხვები
+                            ტელეფონის ნომერი უნდა იყოს ფორმატში 5XXXXXXXX
                           </div>
                         )}
                       </div>
                     </div>
                   </div>
-                  {/* photo */}
-                  <ImageUpload setFieldValue={setFieldValue} />
 
-                  {/* buttons */}
+                  {/* avatar */}
+                  <div className="flex flex-col mt-4">
+                    <label htmlFor="avatar" className="text-[1.2rem]">
+                      ავატარი *
+                    </label>
+                    <ImageUpload
+                      setFieldValue={(field, value) =>
+                        setFieldValue(field, value)
+                      }
+                    />
+                  </div>
 
                   <div className="mt-[4rem] mb-[4rem] flex gap-6 justify-end">
                     <Button
                       title="გაუქმება"
                       backgroundColor="#fff"
                       textColor="#f93b1d"
+                      onClick={handleCloseModal}
                     />
-                    <Button title="დაამატე აგენტი" />
+                    <Button title="დაამატე აგენტი" type="submit" />
                   </div>
                 </Form>
               )}

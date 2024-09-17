@@ -4,7 +4,7 @@ import * as Yup from "yup";
 import ImageUpload from "../components/AddListingComponents/ImageUpload";
 import Button from "../components/CommonComponents/Button";
 import { FaCheck } from "react-icons/fa6";
-
+import { useNavigate } from "react-router-dom";
 interface Region {
   id: number;
   name: string;
@@ -182,7 +182,7 @@ const AddListingForm = () => {
       console.error("Error submitting form:", error);
     }
   };
-
+  const navigate = useNavigate();
   return (
     <section className="px-[50rem]">
       <h2 className="text-center p-[4rem] text-[#021526] text-4xl">
@@ -447,6 +447,7 @@ const AddListingForm = () => {
                 title="გაუქმება"
                 backgroundColor="#fff"
                 textColor="#f93b1d"
+                onClick={() => navigate("/")}
               />
               <Button title="დაამატე ლისტინგი" type="submit" />
             </div>
