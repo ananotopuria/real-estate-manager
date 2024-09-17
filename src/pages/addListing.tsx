@@ -15,9 +15,29 @@ interface City {
   name: string;
 }
 
+interface Agent {
+  id: number;
+  name: string;
+}
+
+interface ListingFormValues {
+  address: string;
+  price: number;
+  area: number;
+  bedrooms: number;
+  city: string;
+  region: string;
+  description: string;
+  postalCode: string;
+  saleRentTag: string;
+  agent: string;
+  image: File | null;
+}
+
 const AddListingForm = () => {
   const [regions, setRegions] = useState<Region[]>([]);
   const [cities, setCities] = useState<City[]>([]);
+  const [agents, setAgents] = useState<Agent[]>([]);
   const [selectedRegion, setSelectedRegion] = useState<number | null>(null);
 
   useEffect(() => {
@@ -90,7 +110,6 @@ const AddListingForm = () => {
     fetchAgents();
   }, []);
 
-  // Validation
   const validationSchema = Yup.object({
     address: Yup.string()
       .required("სავალდებულოა")
@@ -107,22 +126,16 @@ const AddListingForm = () => {
       .test("fileSize", "ფაილი არ უნდა აღემატებოდეს 1MB-ს", (value) => {
         return value && value instanceof File && value.size <= 1024 * 1024;
       }),
-    // region: Yup.string().required("სავალდებულოა"),
-    // city: Yup.string().required("სავალდებულოა"),
-    zipCode: Yup.number()
-      .required("მხოლოდ რიცხვები")
-      .integer("მთელი რიცხვი უნდა იყოს"),
+    postalCode: Yup.string()
+      .required("სავალდებულოა")
+      .matches(/^\d+$/, "მხოლოდ რიცხვები"),
     price: Yup.number()
       .required("სავალდებულოა")
       .integer("მთელი რიცხვი უნდა იყოს"),
     area: Yup.number().required("სავალდებულოა"),
-    // .integer("მთელი რიცხვი უნდა იყოს"),
     bedrooms: Yup.number()
       .required("სავალდებულოა")
       .integer("მთელი რიცხვი უნდა იყოს"),
-    // description: Yup.string()
-    //   .required("სავალდებულოა")
-    //   .min(5, "მინიმუმ 5 სიტყვა"),
     description: Yup.string()
       .required("სავალდებულოა")
       .test("minWords", "მინიმუმ 5 სიტყვა", (value) => {
@@ -133,6 +146,42 @@ const AddListingForm = () => {
     saleRentTag: Yup.string().required("სავალდებულოა"),
     agent: Yup.string().required("სავალდებულოა"),
   });
+
+  const handleSubmit = async (values: ListingFormValues) => {
+    const formData = new FormData();
+
+    Object.entries(values).forEach(([key, value]) => {
+      if (typeof value === "number") {
+        formData.append(key, value.toString());
+      } else if (value instanceof File) {
+        formData.append(key, value);
+      } else {
+        formData.append(key, value);
+      }
+    });
+
+    formData.append(
+      "Authorization",
+      `Bearer 9d01f43f-5130-4ab4-9329-f6f43456d1ff`
+    );
+
+    try {
+      const response = await fetch(
+        "https://api.real-estate-manager.redberryinternship.ge/api/real-estates",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+      if (response.ok) {
+        console.log("Form submitted successfully");
+      } else {
+        console.error("Form submission failed");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
+  };
 
   return (
     <section className="px-[50rem]">
@@ -145,18 +194,16 @@ const AddListingForm = () => {
           image: null,
           region: "",
           city: "",
-          zipCode: "",
-          price: "",
-          area: "",
-          bedrooms: "",
+          postalCode: "",
+          price: 0,
+          area: 0,
+          bedrooms: 0,
           description: "",
           saleRentTag: "",
           agent: "",
         }}
         validationSchema={validationSchema}
-        onSubmit={(values) => {
-          console.log("Form submitted:", values);
-        }}
+        onSubmit={handleSubmit}
       >
         {({ setFieldValue, errors, touched, values }) => (
           <Form>
@@ -204,12 +251,12 @@ const AddListingForm = () => {
                   className="border border-custom-border rounded-lg p-2 text-custom-blue focus:outline-none focus:ring-1 focus:ring-custom-orange mt-2"
                 />
                 <div className="text-sm mt-1 flex items-center">
-                  {errors.zipCode && touched.zipCode ? (
+                  {errors.postalCode && touched.postalCode ? (
                     <div className="text-[#F93B1D] flex items-center">
                       <FaCheck className="text-[#F93B1D] mr-1" />{" "}
-                      {errors.zipCode}
+                      {errors.postalCode}
                     </div>
-                  ) : values.zipCode && !errors.zipCode ? (
+                  ) : values.postalCode && !errors.postalCode ? (
                     <div className="text-[#45A849] flex items-center">
                       <FaCheck className="text-[#45A849] mr-1" /> მხოლოდ
                       რიცხვები
@@ -382,7 +429,13 @@ const AddListingForm = () => {
                 className="border border-custom-border rounded-lg p-2 text-custom-blue focus:outline-none focus:ring-1 focus:ring-custom-orange mt-2 w-[48.5%]"
               >
                 <option value="">აირჩიეთ აგენტი</option>
+                {agents.map((agent) => (
+                  <option key={agent.id} value={agent.id}>
+                    {agent.name}
+                  </option>
+                ))}
               </Field>
+
               <ErrorMessage name="agent">
                 {(msg) => (
                   <div className="text-red-600 text-sm mt-1">{msg}</div>
@@ -395,7 +448,7 @@ const AddListingForm = () => {
                 backgroundColor="#fff"
                 textColor="#f93b1d"
               />
-              <Button title="დაამატე ლისტინგი" />
+              <Button title="დაამატე ლისტინგი" type="submit" />
             </div>
           </Form>
         )}
@@ -405,4 +458,3 @@ const AddListingForm = () => {
 };
 
 export default AddListingForm;
-

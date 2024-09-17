@@ -8,6 +8,7 @@ interface ButtonProps {
   textColor?: string;
   borderColor?: string;
   onClick?: () => void;
+  type?: "button" | "submit" | "reset";
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -17,11 +18,12 @@ const Button: React.FC<ButtonProps> = ({
   textColor = "#ffffff",
   borderColor = "#f93b1d",
   onClick,
+  type = "button",
 }) => {
   const buttonStyle: CSSProperties = {
     backgroundColor,
     color: textColor,
-    border: `1px solid ${borderColor}`, 
+    border: `1px solid ${borderColor}`,
     borderRadius: "4px",
     padding: "1rem 1.6rem",
     display: "flex",
@@ -36,7 +38,7 @@ const Button: React.FC<ButtonProps> = ({
   };
 
   return (
-    <button style={buttonStyle} onClick={onClick}>
+    <button style={buttonStyle} onClick={onClick} type={type}>
       {icon && <span style={iconStyle}>{icon}</span>}
       {title}
     </button>
